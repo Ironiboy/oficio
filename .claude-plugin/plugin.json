@@ -1,0 +1,11 @@
+{
+  "name": "oficio",
+  "version": "1.1.0",
+  "description": "Desarrollar apps para Apple con oficio: guantelete de Uncle Bob con puertas deterministas, decisiones con números, estado del arte siempre y contención de tokens sin perder calidad.",
+  "author": {
+    "name": "Ironiboy",
+    "url": "https://github.com/Ironiboy"
+  },
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
+}

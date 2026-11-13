@@ -1,0 +1,22 @@
+[
+  {"query": "Añade un modo de lectura nocturno al lector de mi app de iOS en SwiftUI, con su test", "should_trigger": true},
+  {"query": "La app de macOS se congela al importar 5.000 artículos y no sé por qué; ayúdame a encontrarlo", "should_trigger": true},
+  {"query": "Necesito añadir una relación nueva al modelo de SwiftData y que siga funcionando con CloudKit", "should_trigger": true},
+  {"query": "¿Uso Foundation Models o un modelo propio para clasificar las notas del usuario en el iPhone?", "should_trigger": true},
+  {"query": "Me salen warnings de Sendable al compilar con Swift 6, arréglalos sin romper nada", "should_trigger": true},
+  {"query": "Prepara la versión 1.2 para enviarla a revisión de App Store", "should_trigger": true},
+  {"query": "Retomamos el proyecto de la app de recetas para iPad donde lo dejamos ayer", "should_trigger": true},
+  {"query": "quiero un widget de pantalla de inicio que muestre lo último guardado", "should_trigger": true},
+  {"query": "Los tests de mi paquete Swift pasan solos pero fallan cuando corro toda la suite", "should_trigger": true},
+  {"query": "Elige el mejor modelo de embeddings para la búsqueda semántica de mi app de visionOS", "should_trigger": true},
+  {"query": "Escribe un script en Python que renombre las fotos de una carpeta por fecha", "should_trigger": false},
+  {"query": "Hazme una API REST en Node con Express para gestionar usuarios", "should_trigger": false},
+  {"query": "Traduce al inglés este String Catalog de mi app (Localizable.xcstrings)", "should_trigger": false},
+  {"query": "¿Qué diferencias hay entre el iPhone 17 y el 17 Pro para comprarme uno?", "should_trigger": false},
+  {"query": "Crea una app Android en Kotlin con Jetpack Compose que lea artículos", "should_trigger": false},
+  {"query": "Perfila con xctrace por qué mi app usa tanta CPU y dame el informe de Instruments", "should_trigger": false},
+  {"query": "Explícame qué es Swift y en qué se diferencia de Objective-C, para una charla", "should_trigger": false},
+  {"query": "Configura mi status line de Claude Code para que muestre la rama de git", "should_trigger": false},
+  {"query": "Revisa la accesibilidad de VoiceOver de esta vista concreta de SwiftUI y dime qué etiquetas faltan", "should_trigger": false},
+  {"query": "Haz una presentación de 10 diapositivas sobre la historia de Apple", "should_trigger": false}
+]

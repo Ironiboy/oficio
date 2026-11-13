@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "oficio",
+  "description": "Desarrollo de apps para el ecosistema Apple con el método de Uncle Bob y números medidos.",
+  "owner": {
+    "name": "Ironiboy",
+    "url": "https://github.com/Ironiboy"
+  },
+  "plugins": [
+    {
+      "name": "oficio",
+      "description": "Guantelete de Uncle Bob, decisiones con números, estado del arte y contención de tokens para Swift/SwiftUI.",
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}

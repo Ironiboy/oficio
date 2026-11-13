@@ -1,0 +1,70 @@
+{
+  "skill_name": "oficio",
+  "_nota": "Formato del skill-creator de Anthropic. Cada tarea se ejecuta con la skill y sin ella (o con la versión anterior); las expectativas se puntúan como pasa/falla con su evidencia. Se mide también tokens y tiempo.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "En mi app SwiftData tengo `enum ArticleState: String, Codable { case unread, archived }` y `var state: ArticleState` en `@Model final class Article`. Añade un índice sobre `state` para que la lista de no leídos vaya rápida.",
+      "expected_output": "No indexa el enum: persiste el valor bruto como String, indexa ese y deja el enum como propiedad calculada; avisa de que #Index sobre el enum aborta el ModelContainer.",
+      "expectations": [
+        "No propone `#Index` directamente sobre la propiedad enum",
+        "Persiste un `stateRaw: String` (o equivalente primitivo) y pone el índice sobre él",
+        "Explica que el índice sobre un enum aborta al construir el ModelContainer",
+        "Escribe o propone un test antes del cambio"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Quiero filtrar la biblioteca por tema con `#Predicate<Article> { $0.classification?.topic == topic }`. Impleméntalo en la consulta de la lista.",
+      "expected_output": "Avisa de que el predicado sobre un enum a través de una relación mata el proceso y filtra en memoria dentro de un actor con su propio contexto.",
+      "expectations": [
+        "No deja el `#Predicate` sobre el enum a través de la relación",
+        "Filtra en memoria, preferiblemente en un `@ModelActor`",
+        "Menciona que el fallo no es capturable con `try`"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Ya he cambiado el parser y compila. Dime si está todo bien para hacer commit.",
+      "expected_output": "No declara nada como bueno sin ejecutar tests y puertas y mostrar su salida; fuerza recompilación antes de afirmar cero warnings.",
+      "expectations": [
+        "Ejecuta (o pide ejecutar) la suite de tests antes de afirmar que está bien",
+        "Menciona las puertas (CRAP, mutantes o forma) sobre lo tocado",
+        "No acepta un «0 warnings» de un build incremental sin tocar los ficheros",
+        "No dice «listo» sin evidencia de comandos"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Tengo un clasificador propio en Core ML. ¿Merece la pena pasarlo a otro formato para que vaya más rápido en el iPhone?",
+      "expected_output": "Revisa el SDK instalado (Core AI en iOS 27), propone medir con la máquina libre latencia por unidad, carga, pico de memoria y paridad, y mantener Core ML como respaldo si el objetivo mínimo es anterior.",
+      "expectations": [
+        "Comprueba qué frameworks hay en el SDK instalado o menciona Core AI",
+        "Propone medir latencia por unidad de cómputo, carga, memoria y paridad antes de decidir",
+        "Tiene en cuenta el objetivo mínimo de despliegue y una ruta de respaldo",
+        "No recomienda un formato sin cifras"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Programa una tarea en segundo plano con BGTaskScheduler que reindexe la búsqueda por la noche.",
+      "expected_output": "Registra en el lanzamiento, encola solo si el registro tuvo éxito, declara identificadores y modos en el Info.plist, y verifica en dispositivo con pendingTaskRequests.",
+      "expectations": [
+        "Encola solo si `register` devolvió `true` (o guarda equivalente)",
+        "Incluye `BGTaskSchedulerPermittedIdentifiers` y `processing` en `UIBackgroundModes`",
+        "Indica que la verificación real es en dispositivo, no en simulador"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "El entrenamiento del modelo tarda 8 horas. Lánzalo y avísame cuando acabe.",
+      "expected_output": "Lo lanza en segundo plano, con puntos de control, comprueba memoria y disco y termina el turno sin vigilar; no lanza otro proceso pesado a la vez.",
+      "expectations": [
+        "Lanza el proceso en segundo plano sin quedarse mirando el log",
+        "Comprueba disco o memoria antes de lanzar",
+        "Menciona puntos de control o cómo retomar",
+        "No lanza un agente que espere al entrenamiento"
+      ]
+    }
+  ]
+}
