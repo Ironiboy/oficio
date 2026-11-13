@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+"""Forma: la belleza del código en cifras, con trinquete.
+
+    scripts/gates/forma            informe frente a las metas
+    scripts/gates/forma --check    falla si algo empeora frente a forma-base.json
+    scripts/gates/forma --update   fija la base en el estado actual (solo tras mejorar)
+
+Metas: ficheros <= 400 líneas, funciones <= 40, comentario <= 15 % por módulo, ningún tipo sin
+uso, ningún ciclo entre ficheros de un módulo y ningún bloque de 6 líneas de código repetido. El trinquete solo deja ir hacia la meta: lo que hoy la incumple puede
+mejorar, nunca empeorar, y lo que la cumple ya no puede romperla.
+"""
+import json, os, re, sys
+from collections import defaultdict
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE = os.path.join(ROOT, 'scripts/gates/forma-base.json')
+# Carpetas que mide la forma: `OFICIO_FUENTES` separadas por comas (p. ej. `MiAppKit/Sources,MiApp,MiAppWidgets`).
+PKG = os.environ.get('OFICIO_PKG', '.')
+SOURCES = tuple(os.environ.get('OFICIO_FUENTES', ('Sources' if PKG == '.' else PKG + '/Sources')).split(','))
+GOALS = dict(file=400, function=40, comment=0.15)
+TYPE = re.compile(r'^(?:@\w+\s+)*(?:public |internal |final |nonisolated )*'
+                  r'(?:enum|struct|class|actor|protocol) ([A-Z]\w*)', re.M)
+DISCOVERED = re.compile(r'\b(AppIntent|AppShortcutsProvider|Widget|WidgetBundle|App)\b')
+FUNC = re.compile(r'^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:public|private|fileprivate|internal|static|'
+                  r'nonisolated|override|mutating|final|class)\s+)*(?:func|init)\b')
+CONTINUES = re.compile(r'^\s*(\{|\)|->|async|throws|rethrows|where)')
+TRIVIAL = re.compile(r'^[\s{}()\[\],;]*$|^(import |case |default:|return\b|@)')
+WINDOW = 6
+
+
+def swift_files():
+    for top in SOURCES:
+        for folder, _, names in os.walk(os.path.join(ROOT, top)):
+            for name in names:
+                if name.endswith('.swift'):
+                    yield os.path.relpath(os.path.join(folder, name), ROOT)
+
+
+def code_only(line, state):
+    """La línea sin comentarios ni literales; `state` arrastra el /* */ abierto."""
+    out, i = [], 0
+    while i < len(line):
+        if state['block']:
+            end = line.find('*/', i)
+            if end < 0: return ''.join(out)
+            state['block'], i = False, end + 2
+        elif line.startswith('//', i): break
+        elif line.startswith('/*', i): state['block'], i = True, i + 2
+        elif line[i] == '"':
+            end = line.find('"', i + 1)
+            i = len(line) if end < 0 else end + 1
+        else: out.append(line[i]); i += 1
+    return ''.join(out)
+
+
+def functions(lines):
+    """(línea, longitud) de cada función, por llaves sobre el código sin comentarios. La firma
+    puede ocupar varias líneas; sin llave antes de que acabe, es una declaración sin cuerpo."""
+    state, found, open_at = {'block': False}, [], []
+    depth, signature, parens = 0, None, 0
+    for n, raw in enumerate(lines, 1):
+        code = code_only(raw, state)
+        if FUNC.match(raw): signature, parens = n, 0
+        if signature:
+            parens += code.count('(') - code.count(')')
+            following = lines[n] if n < len(lines) else ''
+            if '{' in code: open_at.append((signature, depth)); signature = None
+            elif parens <= 0 and not CONTINUES.match(following): signature = None
+        depth += code.count('{') - code.count('}')
+        while open_at and depth <= open_at[-1][1]:
+            start, _ = open_at.pop()
+            found.append((start, n - start + 1))
+    return found
+
+
+def code_text(text):
+    state = {'block': False}
+    return [code_only(line, state).strip() for line in text.split('\n')]
+
+
+def module_of(path):
+    return (path.split('/')[2] if PKG != '.' and path.startswith(PKG + '/') else path.split('/')[1] if PKG == '.' and path.startswith('Sources/') else path.split('/')[0])
+
+
+def cycles(texts, module=module_of):
+    """Ficheros de cada módulo que se usan en círculo (Tarjan sobre «nombra un tipo de»)."""
+    owner = {t: p for p, text in texts.items() for t in TYPE.findall(text)}
+    uses = {p: {owner[w] for w in re.findall(r'\b[A-Z]\w*\b', '\n'.join(code_text(text)))
+                if owner.get(w, p) != p and module(owner[w]) == module(p)}
+            for p, text in texts.items()}
+    index, low, stack, found = {}, {}, [], defaultdict(list)
+
+    def visit(v):
+        index[v] = low[v] = len(index)
+        stack.append(v)
+        for w in uses[v]:
+            if w not in index: visit(w); low[v] = min(low[v], low[w])
+            elif w in stack: low[v] = min(low[v], index[w])
+        if low[v] == index[v]:
+            group = stack[stack.index(v):]
+            del stack[stack.index(v):]
+            if len(group) > 1: found[module(v)] += group
+    for v in sorted(texts):
+        if v not in index: visit(v)
+    return {m: sorted(g) for m, g in found.items()}
+
+
+def duplicates(texts):
+    """Líneas de código de cada fichero dentro de un bloque de WINDOW repetido en otro sitio."""
+    lines = {p: [(n, re.sub(r'\s+', ' ', c)) for n, c in enumerate(code_text(t))
+                 if c and not TRIVIAL.match(c)] for p, t in texts.items()}
+    seen = defaultdict(list)
+    for p, ls in lines.items():
+        for i in range(len(ls) - WINDOW + 1):
+            seen['\n'.join(c for _, c in ls[i:i + WINDOW])].append((p, i))
+    hit = defaultdict(set)
+    for places in seen.values():
+        if len(places) > 1:
+            for p, i in places: hit[p].update(n for n, _ in lines[p][i:i + WINDOW])
+    return {p: len(ns) for p, ns in hit.items()}
+
+
+def measure():
+    files, modules, texts = {}, defaultdict(lambda: [0, 0]), {}
+    for path in swift_files():
+        lines = open(os.path.join(ROOT, path), encoding='utf-8').read().split('\n')
+        texts[path] = '\n'.join(lines)
+        comments = sum(1 for l in lines if l.lstrip().startswith(('//', '/*', '*')))
+        module = (path.split('/')[2] if PKG != '.' and path.startswith(PKG + '/') else path.split('/')[1] if PKG == '.' and path.startswith('Sources/') else path.split('/')[0])
+        modules[module][0] += len(lines); modules[module][1] += comments
+        long = {f'{path}:{a}': b for a, b in functions(lines) if b > GOALS['function']}
+        files[path] = dict(lines=len(lines), long=long)
+    # Muerto: el nombre solo aparece en su propia declaración. Lo que el sistema descubre solo
+    # (intents, atajos, widgets, @main) no cuenta.
+    names = re.findall(r'\b[A-Z]\w*\b', '\n'.join(texts.values()))
+    uses = defaultdict(int)
+    for n in names: uses[n] += 1
+    dead = sorted(f'{t} ({p})' for p, text in texts.items() for t in TYPE.findall(text)
+                  if uses[t] == 1 and not DISCOVERED.search(text.split(t, 1)[1][:300]))
+    return dict(
+        files={p: f['lines'] for p, f in files.items() if f['lines'] > GOALS['file']},
+        functions={k: v for f in files.values() for k, v in f['long'].items()},
+        comment={m: round(c / l, 4) for m, (l, c) in modules.items()},
+        dead=dead, cycles=cycles(texts), duplicated=duplicates(texts))
+
+
+def report(m):
+    print(f"Ficheros > {GOALS['file']} líneas: {len(m['files'])}")
+    for p, n in sorted(m['files'].items(), key=lambda x: -x[1]): print(f'  {n:5}  {p}')
+    print(f"Funciones > {GOALS['function']} líneas: {len(m['functions'])}")
+    for k, n in sorted(m['functions'].items(), key=lambda x: -x[1])[:15]: print(f'  {n:5}  {k}')
+    print(f"Comentario por módulo (meta {GOALS['comment']:.0%}):")
+    for mod, r in sorted(m['comment'].items(), key=lambda x: -x[1]): print(f'  {r:5.0%}  {mod}')
+    print(f"Tipos sin uso: {len(m['dead'])}")
+    for d in m['dead']: print(f'  {d}')
+    print(f"Ficheros en ciclos: {sum(map(len, m['cycles'].values()))}")
+    for mod, fs in sorted(m['cycles'].items()): print(f'  {mod}: {", ".join(os.path.basename(f) for f in fs)}')
+    print(f"Líneas duplicadas: {sum(m['duplicated'].values())}")
+    for p, n in sorted(m['duplicated'].items(), key=lambda x: -x[1])[:10]: print(f'  {n:5}  {p}')
+
+
+def regressions(now, base):
+    """Lo que empeora. Una función larga es deuda del módulo: moverla de fichero no empeora."""
+    bad = [f'{p}: {n} líneas (base {base["files"].get(p, GOALS["file"])})'
+           for p, n in now['files'].items() if n > base['files'].get(p, GOALS['file'])]
+    home = lambda q: module_of(q.rsplit(':', 1)[0])
+    per_module = lambda fs: defaultdict(list, {m: sorted(v for q, v in fs.items() if home(q) == m)
+                                               for m in map(home, fs)})
+    nf, bf = per_module(now['functions']), per_module(base['functions'])
+    bad += [f'{m}: funciones largas {nf[m]} (base {bf[m]})' for m in nf
+            if len(nf[m]) > len(bf[m]) or sum(nf[m]) > sum(bf[m])]
+    bad += [f'{m}: comentario {r:.1%} (base {base["comment"].get(m, GOALS["comment"]):.1%})'
+            for m, r in now['comment'].items()
+            if r > max(base['comment'].get(m, 0), GOALS['comment']) + 0.0005]
+    bad += [f'tipo sin uso nuevo: {d}' for d in now['dead'] if d not in base['dead']]
+    bad += [f'{f} entra en un ciclo de {m}' for m, fs in now['cycles'].items() for f in fs
+            if f not in base.get('cycles', {}).get(m, [])]
+    bad += [f'{p}: {n} líneas duplicadas (base {base.get("duplicated", {}).get(p, 0)})'
+            for p, n in now['duplicated'].items() if n > base.get('duplicated', {}).get(p, 0)]
+    return bad
+
+
+if __name__ == '__main__':
+    now = measure()
+    if '--update' in sys.argv:
+        json.dump(now, open(BASE, 'w'), ensure_ascii=False, indent=1, sort_keys=True)
+        print('forma: base actualizada')
+    elif '--check' in sys.argv:
+        bad = regressions(now, json.load(open(BASE)))
+        for b in bad: print('forma: empeora', b)
+        print(f'forma: {len(bad)} regresiones')
+        sys.exit(1 if bad else 0)
+    else:
+        report(now)

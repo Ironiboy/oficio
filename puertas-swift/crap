@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+"""crap <base> [--filter TargetDeTests] [--max 8] — ver README.md."""
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+import gates
+gates.main("crap", sys.argv[1:])
