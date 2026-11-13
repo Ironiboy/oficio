@@ -1,5 +1,9 @@
 # Cambios
 
+## 1.1.1 — 2026-11-13
+
+- README en inglés y más cercano; historial sin datos de la máquina (correo anónimo de GitHub).
+
 ## 1.1.0 — 2026-11-13
 
 - **Plugin de Claude Code** (`.claude-plugin/`), con marketplace propio y licencia MIT.

@@ -1,7 +1,7 @@
 {
   "name": "oficio",
-  "version": "1.1.0",
-  "description": "Desarrollar apps para Apple con oficio: guantelete de Uncle Bob con puertas deterministas, decisiones con números, estado del arte siempre y contención de tokens sin perder calidad.",
+  "version": "1.1.1",
+  "description": "Build Apple apps with craft: Uncle Bob's discipline as deterministic gates (acceptance tests first, CRAP ≤ 8, zero surviving mutants), decisions backed by numbers, always state of the art, and fewer tokens without losing quality.",
   "author": {
     "name": "Ironiboy",
     "url": "https://github.com/Ironiboy"
