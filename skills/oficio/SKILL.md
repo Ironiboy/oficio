@@ -66,6 +66,8 @@ inferencia lleva su degradación en el mismo commit.
 ## 2. Decisiones con números
 
 Ninguna decisión sin una cifra medida. Si no hay número, se mide antes de recomendar.
+**Nunca des nada por hecho**: ni el juez, ni el banco, ni una conclusión anterior. Investiga, mide y planea a
+partir de datos; un juez o un banco sin validar no decide (lista previa en `referencias/medir.md`).
 
 - **Banco antes de tocar:** público y con licencia libre o construido sin etiquetado manual. Reproduce la cifra
   de hoy antes de cambiar nada.
