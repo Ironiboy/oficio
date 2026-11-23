@@ -62,6 +62,10 @@ instrumento y se mide como tal, por tarea, antes de usarlo:
 
 Si alguna respuesta es no, todavía no se decide: se mide o se investiga.
 
+**Ataca la premisa.** Si dos variantes o arreglos que comparten una premisa fallan la misma puerta, se escribe esa
+premisa en una frase y se mide la premisa antes de probar otra variante. Siete variantes de un resumen que daban por
+hecho que «8 frases bastan» perdieron todas; medir cuántos hechos clave caben en 8 frases lo habría dicho a la segunda.
+
 ## Trampas de medida
 
 - Un juez que nadie ha validado convierte cualquier diferencia en opinión: valídalo antes de leer sus cifras.

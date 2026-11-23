@@ -6,8 +6,9 @@
     scripts/gates/forma --update   fija la base en el estado actual (solo tras mejorar)
 
 Metas: ficheros <= 400 líneas, funciones <= 40, comentario <= 15 % por módulo, ningún tipo sin
-uso, ningún ciclo entre ficheros de un módulo y ningún bloque de 6 líneas de código repetido. El trinquete solo deja ir hacia la meta: lo que hoy la incumple puede
-mejorar, nunca empeorar, y lo que la cumple ya no puede romperla.
+uso, ningún ciclo entre ficheros de un módulo, ningún bloque de 6 líneas de código repetido y ninguna función que sea
+copia de otra con los nombres cambiados (parecido estructural >= 0,8, la idea de unclebob/dryer). El trinquete solo
+deja ir hacia la meta: lo que hoy la incumple puede mejorar, nunca empeorar, y lo que la cumple ya no puede romperla.
 """
 import json, os, re, sys
 from collections import defaultdict
@@ -26,6 +27,11 @@ FUNC = re.compile(r'^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:public|private|filepriva
 CONTINUES = re.compile(r'^\s*(\{|\)|->|async|throws|rethrows|where)')
 TRIVIAL = re.compile(r'^[\s{}()\[\],;]*$|^(import |case |default:|return\b|@)')
 WINDOW = 6
+SIMILAR, MIN_TOKENS, SHINGLE = 0.8, 40, 5
+KEYWORDS = set('''as async await break case catch class continue default defer do else enum extension fallthrough
+false for func guard if import in init inout is let nil private public internal fileprivate protocol repeat rethrows
+return self Self static struct subscript super switch throw throws true try var where while actor some any
+mutating nonisolated override final weak unowned lazy get set willSet didSet'''.split())
 
 
 def swift_files():
@@ -120,6 +126,49 @@ def duplicates(texts):
     return {p: len(ns) for p, ns in hit.items()}
 
 
+def shape(code):
+    """La forma de un cuerpo: palabras clave, tipos, llamadas y signos quedan; los nombres locales pasan a «v» y los
+    números a «0». Dos copias con las variables renombradas dan la misma forma."""
+    out = []
+    for m in re.finditer(r'[A-Za-z_]\w*(?=\s*\()|[A-Za-z_]\w*|\d[\w.]*|\S', code):
+        t = m.group(0)
+        if t[0].isdigit(): out.append('0')
+        elif t[0].isalpha() or t[0] == '_':
+            called = code[m.end():m.end() + 1] == '(' or code[m.end():].lstrip().startswith('(')
+            out.append(t if t in KEYWORDS or t[0].isupper() or called else 'v')
+        else: out.append(t)
+    return out
+
+
+def similar(texts):
+    """Funciones de cada fichero que tienen una gemela estructural (>= SIMILAR) en otro sitio. Candidatas por tramos
+    de SHINGLE fichas en común; se confirma con la proporción de difflib sobre la forma entera."""
+    import difflib
+    units = []
+    for p, t in texts.items():
+        lines, code = t.split('\n'), code_text(t)
+        for start, length in functions(lines):
+            body = shape(' '.join(code[start - 1:start - 1 + length]))
+            if len(body) >= MIN_TOKENS: units.append((p, start, body))
+    index = defaultdict(set)
+    for k, (_, _, body) in enumerate(units):
+        for i in range(0, len(body) - SHINGLE + 1, 2): index[tuple(body[i:i + SHINGLE])].add(k)
+    shared = defaultdict(int)
+    for ks in index.values():
+        if len(ks) > 30: continue  # tramos comunes a todo (llaves, «let v = v»): no distinguen
+        ks = sorted(ks)
+        for a in range(len(ks)):
+            for b in range(a + 1, len(ks)): shared[(ks[a], ks[b])] += 1
+    hit = defaultdict(set)
+    for (a, b), n in shared.items():
+        (pa, sa, ba), (pb, sb, bb) = units[a], units[b]
+        if n < 3 or min(len(ba), len(bb)) / max(len(ba), len(bb)) < SIMILAR: continue
+        if (pa, sa) == (pb, sb): continue
+        if difflib.SequenceMatcher(None, ba, bb, autojunk=False).ratio() >= SIMILAR:
+            hit[pa].add(sa); hit[pb].add(sb)
+    return {p: len(s) for p, s in hit.items()}
+
+
 def measure():
     files, modules, texts = {}, defaultdict(lambda: [0, 0]), {}
     for path in swift_files():
@@ -141,7 +190,7 @@ def measure():
         files={p: f['lines'] for p, f in files.items() if f['lines'] > GOALS['file']},
         functions={k: v for f in files.values() for k, v in f['long'].items()},
         comment={m: round(c / l, 4) for m, (l, c) in modules.items()},
-        dead=dead, cycles=cycles(texts), duplicated=duplicates(texts))
+        dead=dead, cycles=cycles(texts), duplicated=duplicates(texts), similar=similar(texts))
 
 
 def report(m):
@@ -157,6 +206,8 @@ def report(m):
     for mod, fs in sorted(m['cycles'].items()): print(f'  {mod}: {", ".join(os.path.basename(f) for f in fs)}')
     print(f"Líneas duplicadas: {sum(m['duplicated'].values())}")
     for p, n in sorted(m['duplicated'].items(), key=lambda x: -x[1])[:10]: print(f'  {n:5}  {p}')
+    print(f"Funciones con gemela estructural (>= {SIMILAR}): {sum(m['similar'].values())}")
+    for p, n in sorted(m['similar'].items(), key=lambda x: -x[1])[:10]: print(f'  {n:5}  {p}')
 
 
 def regressions(now, base):
@@ -177,6 +228,8 @@ def regressions(now, base):
             if f not in base.get('cycles', {}).get(m, [])]
     bad += [f'{p}: {n} líneas duplicadas (base {base.get("duplicated", {}).get(p, 0)})'
             for p, n in now['duplicated'].items() if n > base.get('duplicated', {}).get(p, 0)]
+    bad += [f'{p}: {n} funciones con gemela estructural (base {base.get("similar", {}).get(p, 0)})'
+            for p, n in now.get('similar', {}).items() if n > base.get('similar', {}).get(p, 0)]
     return bad
 
 

@@ -40,7 +40,7 @@ Un solo agente recorre la cadena y repite cada puerta hasta que pasa. Las puerta
 frente a una base (`HEAD` o la rama principal), así que se exigen al máximo desde el primer día.
 
 1. **Specifier:** criterios de aceptación como tests, **antes** del código. Tienen que fallar, y por la razón
-   esperada.
+   esperada. Si un test seguiría pasando aunque todas las funciones devolvieran nada, se tira.
 2. **Coder:** el diff más corto que funcione. Borrar antes que añadir. Sin abstracciones que nadie pidió.
    Plataforma y stdlib primero; una dependencia externa solo tras medir la alternativa nativa.
 3. **Cleaner:** CRAP ≤ 8 por función tocada (`CRAP = c² · (1 − cobertura)³ + c`).
@@ -50,7 +50,8 @@ frente a una base (`HEAD` o la rama principal), así que se exigen al máximo de
 5. **QA:** build y suite entera **en todas las plataformas**, sin warnings. Un «0 warnings» incremental no
    vale: `touch` a los ficheros tocados antes de compilar. Un procedimiento manual se convierte en test.
 6. **Forma (trinquete):** ficheros ≤ 400 líneas, funciones ≤ 40, comentarios ≤ 15 % y solo el porqué, sin
-   ciclos, sin duplicación, sin tipos sin uso (un tipo entra en el commit de su primer uso real).
+   ciclos, sin duplicación (ni bloques repetidos ni funciones gemelas con los nombres cambiados), sin tipos sin uso
+   (un tipo entra en el commit de su primer uso real).
 
 Las reglas de las puertas no se aflojan para pasar. Un falso positivo se arregla en la puerta, con su test, en
 un commit aparte.

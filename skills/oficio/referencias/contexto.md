@@ -43,6 +43,9 @@ más que cualquier lectura.
   Nunca con una puerta a medias ni con procesos corriendo que haya que recoger.
 - **`/compact` con instrucciones de foco** antes de un cambio grande de tema, si no se puede limpiar.
 - **La sesión nueva empieza por `TRASPASO.md` y el plan**, no explorando el repo.
+- **Worktrees:** al acabar, se borra el que nada usa (ni proceso ni cola) y su compilación; lo que tenga cambios sin
+  commit espera a que se decida o se conserva en otro sitio antes. Sin limpiar, cuatro copias con su `.build` se comen
+  el disco de 16 GB.
 - **Memoria:** un hecho por fichero, con su porqué; el índice, una línea por entrada. Nada que ya esté en el
   repo o en el historial.
 - **Skills e instrucciones cortas:** lo que se carga siempre (CLAUDE.md, SKILL.md, hooks), al mínimo; el

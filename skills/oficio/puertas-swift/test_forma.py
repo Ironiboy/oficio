@@ -45,6 +45,27 @@ class Duplicates(unittest.TestCase):
         texts = {'A.swift': self.block, 'B.swift': '// otro\n' + self.block}
         self.assertEqual(forma.duplicates(texts), {'A.swift': 6, 'B.swift': 6})
 
+    def test_renamed_copy_of_a_function_is_a_structural_twin(self):
+        body = """    func {name}(_ {a}: [Int], limit {b}: Int) -> [Int] {{
+        var {c}: [Int] = []
+        for {d} in {a} where {d} > 0 {{
+            if {c}.count >= {b} {{ break }}
+            {c}.append({d} * 2 + 1)
+        }}
+        guard !{c}.isEmpty else {{ return [] }}
+        return {c}.sorted().reversed().map {{ $0 + {b} }}
+    }}"""
+        one = 'struct A {\n' + body.format(name='first', a='xs', b='n', c='out', d='x') + '\n}'
+        two = 'struct B {\n' + body.format(name='second', a='ys', b='m', c='acc', d='y') + '\n}'
+        self.assertEqual(forma.similar({'a.swift': one, 'b.swift': two}), {'a.swift': 1, 'b.swift': 1})
+
+    def test_different_functions_are_not_twins(self):
+        one = 'struct A {\n    func f(_ xs: [Int]) -> Int {\n' + '\n'.join(
+            f'        let v{i} = xs.reduce({i}, +) * {i}' for i in range(12)) + '\n        return v0\n    }\n}'
+        two = 'struct B {\n    func g(_ s: String) -> Bool {\n' + '\n'.join(
+            f'        if s.hasPrefix("p{i}") {{ print(s.count) }}' for i in range(12)) + '\n        return true\n    }\n}'
+        self.assertEqual(forma.similar({'a.swift': one, 'b.swift': two}), {})
+
     def test_five_lines_or_comments_do_not(self):
         five = '\n'.join(self.block.split('\n')[:5])
         comments = '\n'.join('// igual' for _ in range(8))
@@ -100,6 +121,12 @@ class Regressions(unittest.TestCase):
         self.assertEqual(self.check(duplicated={'A.swift': 6}), [])
         self.assertEqual(len(self.check(duplicated={'A.swift': 13})), 1)
         self.assertEqual(len(self.check(duplicated={'A.swift': 12, 'B.swift': 6})), 1)
+
+    def test_structural_twins_may_only_shrink(self):
+        base = dict(files={}, functions={}, comment={}, dead=[], cycles={}, duplicated={}, similar={'a.swift': 2})
+        now = dict(base, similar={'a.swift': 3})
+        self.assertEqual(len(forma.regressions(now, base)), 1)
+        self.assertEqual(forma.regressions(dict(base, similar={'a.swift': 1}), base), [])
 
     def test_new_dead_type_fails(self):
         self.assertEqual(len(self.check(dead=['Old (X.swift)', 'New (Y.swift)'])), 1)

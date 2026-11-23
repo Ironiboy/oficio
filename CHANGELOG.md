@@ -1,5 +1,13 @@
 # Cambios
 
+## 1.2.0 — 2026-11-23
+
+Tres principios de [unclebob/ub-mode](https://github.com/unclebob/ub-mode) que el método no tenía:
+- **Funciones gemelas** en la puerta `forma`: misma forma con los nombres locales y los números neutralizados,
+  parecido ≥ 0,8 (la idea de unclebob/dryer, que no soporta Swift). Con base y trinquete, como el resto.
+- **Ataca la premisa** (`referencias/medir.md`) y **tira el test que pasaría vacío** (Specifier).
+- **Limpieza de worktrees** (`referencias/contexto.md`).
+
 ## 1.1.1 — 2026-11-13
 
 - README en inglés y más cercano; historial sin datos de la máquina (correo anónimo de GitHub).
