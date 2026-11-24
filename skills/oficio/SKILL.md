@@ -93,6 +93,11 @@ modelo, un formato o una receta:
   el dispositivo. Lo nuevo entra al bake-off con el protocolo fijo.
 - **Verifica la API contra el SDK instalado**, no contra la memoria ni la web (`grep` en el `.swiftinterface`). Las
   notas de esta skill tienen fecha: en un SDK nuevo, compruébalas otra vez.
+- **Barrido de frontera**, al abrir una campaña y cada vez que dos variantes fallen la misma puerta: qué ha salido en
+  los últimos tres meses que resuelva la etapa **de otra forma** (tendencias de Hugging Face, listas «awesome»,
+  arXiv, clasificaciones públicas), no más variantes del enfoque actual. Lo posterior a tu corte solo se ve buscando.
+- **¿Hay un camino más corto?** Pregúntalo antes de cada plan. Destilar del mejor modelo disponible suele ganar a
+  pulir lo que rodea a uno flojo.
 - Nunca se da una etapa por cerrada. Si algo nuevo se descarta, se dice por qué con su número.
 
 ## 4. Principios de producto

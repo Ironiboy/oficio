@@ -54,7 +54,7 @@ instrumento y se mide como tal, por tarea, antes de usarlo:
 
 ## Antes de decidir, comprueba
 
-1. ¿Investigado el estado del arte de esta etapa, con fecha?
+1. ¿Investigado el estado del arte de esta etapa, con fecha, incluidos los caminos distintos al actual?
 2. ¿El juez está validado contra humanos para esta tarea, lengua y dominio?
 3. ¿Banco público principal y, además, los datos reales?
 4. ¿Prerregistro con regla y tamaño de muestra suficiente?
@@ -71,6 +71,10 @@ hecho que «8 frases bastan» perdieron todas; medir cuántos hechos clave caben
 - Un juez que nadie ha validado convierte cualquier diferencia en opinión: valídalo antes de leer sus cifras.
 
 - La validación contra metadatos ruidosos premia el ruido.
+- **El oro de un solo anotador puede estar roto.** Antes de decidir con él, triangula: dos fuentes humanas
+  independientes (p. ej. anotador y sección del editor) dan un oro doble; si dos modelos de familias distintas
+  contradicen al oro mucho más fuera de ese oro doble que dentro, la etiqueta es el problema, no el modelo. Mide cada
+  clase con varias fuentes y declara las que solo tienen una.
 - Elegir el maestro y juzgar al alumno con el mismo banco infla el resultado; dilo.
 - La máquina ocupada (entrenando, compilando) invalida las latencias; anota la condición y repite.
 - Un filtro de tests que no casa con nada «pasa»: exige que corra al menos un test.

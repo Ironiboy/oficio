@@ -1,5 +1,12 @@
 # Cambios
 
+## 1.3.0 — 2026-11-24
+
+- **Barrido de frontera** y **¿hay un camino más corto?** en el estado del arte: buscar lo publicado en los últimos
+  meses que resuelva la etapa de otra forma, no solo variantes del enfoque actual (los modelos de decisión
+  «System 1» salieron tras el corte y solo se ven buscando).
+- **Oro roto** en las trampas de medida: triangular con fuentes humanas independientes antes de decidir.
+
 ## 1.2.0 — 2026-11-23
 
 Tres principios de [unclebob/ub-mode](https://github.com/unclebob/ub-mode) que el método no tenía:
