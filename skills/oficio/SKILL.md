@@ -3,8 +3,8 @@ name: oficio
 description: >-
   Método completo para desarrollar apps del ecosistema Apple (iOS, iPadOS, macOS, watchOS, visionOS) con Swift 6
   y SwiftUI: guantelete de Uncle Bob con puertas deterministas (aceptación primero, CRAP ≤ 8, cero mutantes vivos,
-  forma, cero warnings), verificar antes de dar algo por hecho, decisiones con números, estado del arte siempre,
-  IA en el dispositivo (Foundation Models, Core AI, Core ML, modelos propios) con degradación, diseño nativo,
+  forma, cero warnings), verificar antes de dar algo por hecho, decisiones con números, estado del arte y
+  ambición (la mejor variante publicada, no la más sencilla), IA en el dispositivo (Foundation Models, Core AI, Core ML, modelos propios) con degradación, diseño nativo,
   trampas verificadas de SwiftData, CloudKit, SwiftUI, concurrencia y plataforma, y contención de tokens sin perder
   calidad. Úsala siempre que se escriba, depure, mida, diseñe o planifique código en un proyecto Apple, aunque no
   se nombre: al implementar una función, arreglar un fallo, cambiar el esquema, elegir framework, modelo o
@@ -21,6 +21,7 @@ en opiniones. Este fichero es corto a propósito; el detalle está en `referenci
 | escribir o cerrar código (cada ciclo) | §1 y `puertas-swift/README.md` |
 | arreglar un fallo | `referencias/depurar.md` |
 | decidir algo (framework, modelo, umbral, receta) | §2, §3 y `referencias/medir.md` |
+| montar una cola, un entrenamiento o un experimento; adoptar un método publicado | §3 y `referencias/ambicion.md` |
 | tocar SwiftData, CloudKit o el esquema | `referencias/swiftdata.md` |
 | tocar concurrencia, actores, `Sendable` | `referencias/concurrencia.md` |
 | diseñar o tocar vistas | `referencias/diseno.md` y `referencias/swiftui.md` |
@@ -81,7 +82,13 @@ partir de datos; un juez o un banco sin validar no decide (lista previa en `refe
 - Las medidas no son tests: van tras un interruptor y fuera de la suite. Lo medido se guarda con su `ESTADO.md`
   (método, cifras, decisión) fuera del repo del producto.
 
-## 3. Estado del arte, siempre
+## 3. Estado del arte y ambición, siempre
+
+**La facilidad de implementación no es un criterio.** El sesgo a vigilar es elegir lo que el agente monta antes
+y llamarlo decisión. Cuentan la calidad para el usuario, el coste en el dispositivo y el tiempo de máquina cuando
+es prohibitivo (con su número). Al adoptar un método publicado se implementa **la variante que el artículo da por
+mejor**; lo simple entra solo como ablación al lado. Antes de cada cola: barrido, tabla de palancas, auditoría de la
+receta heredada y la pregunta «¿qué dejo fuera porque me da más trabajo?» (`referencias/ambicion.md`).
 
 Lo último y lo mejor, demostrado con números, **sin que haya que pedirlo**. Antes de decidir un framework, un
 modelo, un formato o una receta:

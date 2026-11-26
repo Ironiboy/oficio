@@ -1,5 +1,14 @@
 # Cambios
 
+## 1.4.0 — 2026-11-26
+
+- **Ambición** (`referencias/ambicion.md`, §3): la facilidad de implementación del agente no es un criterio. Al adoptar
+  un método publicado se implementa la variante que el artículo da por mejor; lo simple, solo como ablación al lado.
+  Antes de cada cola: barrido con fecha (tres búsquedas, por método, modelo y datos), tabla de palancas, elección
+  anidada, auditoría de la receta heredada (pasos efectivos, contaminación por id y texto, vistas, coste) y la pregunta
+  «¿qué dejo fuera porque me da más trabajo?». Lista de destilación de modelos propios (nov-2026).
+- `medir.md`: cruce de ids y textos entre conjuntos y pasos efectivos comparables antes de entrenar.
+
 ## 1.3.0 — 2026-11-24
 
 - **Barrido de frontera** y **¿hay un camino más corto?** en el estado del arte: buscar lo publicado en los últimos

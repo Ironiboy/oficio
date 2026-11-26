@@ -51,6 +51,10 @@ instrumento y se mide como tal, por tarea, antes de usarlo:
 - Los profesores (jueces que etiquetan) se miden primero contra oro humano; sus etiquetas se combinan con un
   método explícito (Dawid-Skene, probabilidades blandas, filtro de confianza).
 - Siempre 3 semillas o más, con media y desviación; hiperparámetros solo en validación; el oro no se toca.
+- Antes de lanzar: cruce de ids **y textos** entre entrenamiento, dev, prueba y oro (un dev que comparte filas con el
+  entrenamiento elige al brazo que vio el oro), y pasos efectivos comparables entre brazos (filas × épocas ÷ lote).
+- Receta heredada de otra configuración = supuestos por comprobar, no receta fija. Lista completa de destilación
+  y la regla de la mejor variante en `ambicion.md`.
 
 ## Antes de decidir, comprueba
 
